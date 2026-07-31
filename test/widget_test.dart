@@ -1,33 +1,58 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:moodle/main.dart';
 
 void main() {
-  testWidgets('App renders dashboard and courses screen correctly',
-      (WidgetTester tester) async {
-    // Set desktop screen size
-    tester.view.physicalSize = const Size(1200, 800);
-    tester.view.devicePixelRatio = 1.0;
+  testWidgets('dashboard opens the courses page', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
     addTearDown(() {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });
 
-    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MoodleApp());
+    expect(find.text('Welcome back, Samuel'), findsOneWidget);
+
+    await tester.tap(find.text('View courses'));
+    await tester.pumpAndSettle();
+    expect(find.text('Search courses'), findsOneWidget);
+    expect(find.text('UXDI'), findsOneWidget);
+  });
+
+  testWidgets('drawer navigates to profile', (tester) async {
     await tester.pumpWidget(const MoodleApp());
 
-    // Verify that Dashboard title exists.
-    expect(find.text('Dashboard'), findsNWidgets(2));
-
-    // Open drawer
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
-
-    // Navigate to My Courses in drawer
-    await tester.tap(find.text('My courses'));
+    await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
 
-    // Verify Courses page contains title
-    expect(find.text('This is the courses overview page.'), findsOneWidget);
+    expect(find.text('UP2246941'), findsOneWidget);
+    expect(find.text('BSc (Hons) Computer Science'), findsOneWidget);
+  });
+
+  testWidgets('course search filters the list', (tester) async {
+    await tester.pumpWidget(const MoodleApp());
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/courses');
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'UXDI');
+    await tester.pump();
+
+    expect(find.text('UXDI'), findsOneWidget);
+    expect(find.text('PAPL'), findsNothing);
+  });
+
+  testWidgets('login button returns to dashboard', (tester) async {
+    await tester.pumpWidget(const MoodleApp());
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/login');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sign in to Moodle'), findsOneWidget);
+    await tester.tap(find.text('Log in'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome back, Samuel'), findsOneWidget);
   });
 }
