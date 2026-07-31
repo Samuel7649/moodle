@@ -40,7 +40,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'UXDI');
     await tester.pump();
 
-    expect(find.text('UXDI'), findsOneWidget);
+    expect(find.text('UXDI'), findsNWidgets(2));
     expect(find.text('PAPL'), findsNothing);
   });
 
