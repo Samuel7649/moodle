@@ -50,6 +50,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sign in to Moodle'), findsOneWidget);
+    await tester.enterText(
+      find.byType(TextFormField).first,
+      'up2246941@myport.ac.uk',
+    );
     await tester.tap(find.text('Log in'));
     await tester.pumpAndSettle();
 
