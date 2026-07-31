@@ -7,8 +7,6 @@ class NavDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
-    final bool isDashboard = currentRoute == '/';
-    final bool isCourses = currentRoute == '/courses';
 
     return Drawer(
       backgroundColor: moodlePurple,
@@ -16,82 +14,84 @@ class NavDrawer extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: moodleDarkPurple,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    radius: 26,
-                    backgroundColor: moodleWhite,
-                    child: Icon(Icons.person, size: 30, color: moodlePurple),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Yourname Here',
-                    style: TextStyle(
-                      color: moodleWhite,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+            InkWell(
+              onTap: () => _open(context, '/profile', currentRoute),
+              child: const DrawerHeader(
+                decoration: BoxDecoration(color: moodleDarkPurple),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CircleAvatar(
+                      radius: 26,
+                      backgroundColor: moodleWhite,
+                      child: Text(
+                        'SA',
+                        style: TextStyle(
+                          color: moodlePurple,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'up1234567@myport.ac.uk',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
+                    SizedBox(height: 10),
+                    Text(
+                      'Samuel Areoye',
+                      style: TextStyle(
+                        color: moodleWhite,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      'up2246941@myport.ac.uk',
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
             ),
+            _item(context, currentRoute, '/', Icons.speed_outlined, 'Dashboard'),
+            _item(context, currentRoute, '/courses', Icons.school_outlined, 'My courses'),
+            _item(context, currentRoute, '/assessments', Icons.assignment_outlined, 'Assessments'),
+            _item(context, currentRoute, '/calendar', Icons.calendar_month_outlined, 'Calendar'),
+            _item(context, currentRoute, '/notifications', Icons.notifications_outlined, 'Notifications'),
+            _item(context, currentRoute, '/profile', Icons.person_outline, 'Profile'),
+            const Divider(color: Colors.white24),
             ListTile(
-              leading: const Icon(Icons.speed_outlined, color: moodleWhite),
-              title: const Text(
-                'Dashboard',
-                style: TextStyle(color: moodleWhite, fontSize: 16),
+              leading: const Icon(Icons.logout, color: moodleWhite),
+              title: const Text('Log out', style: TextStyle(color: moodleWhite)),
+              onTap: () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
               ),
-              selected: isDashboard,
-              selectedTileColor: Colors.white24,
-              onTap: () {
-                Navigator.pop(context);
-                if (!isDashboard) {
-                  Navigator.pushReplacementNamed(context, '/');
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month_outlined, color: moodleWhite),
-              title: const Text(
-                'Calendar',
-                style: TextStyle(color: moodleWhite, fontSize: 16),
-              ),
-              onTap: () {
-                // placeholder
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.school_outlined, color: moodleWhite),
-              title: const Text(
-                'My courses',
-                style: TextStyle(color: moodleWhite, fontSize: 16),
-              ),
-              selected: isCourses,
-              selectedTileColor: Colors.white24,
-              onTap: () {
-                Navigator.pop(context);
-                if (!isCourses) {
-                  Navigator.pushReplacementNamed(context, '/courses');
-                }
-              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _item(
+    BuildContext context,
+    String currentRoute,
+    String route,
+    IconData icon,
+    String label,
+  ) {
+    return ListTile(
+      leading: Icon(icon, color: moodleWhite),
+      title: Text(label, style: const TextStyle(color: moodleWhite)),
+      selected: currentRoute == route,
+      selectedTileColor: Colors.white24,
+      onTap: () => _open(context, route, currentRoute),
+    );
+  }
+
+  void _open(BuildContext context, String route, String currentRoute) {
+    Navigator.pop(context);
+    if (currentRoute != route) {
+      Navigator.pushReplacementNamed(context, route);
+    }
   }
 }
