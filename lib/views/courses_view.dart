@@ -1,87 +1,135 @@
 import 'package:flutter/material.dart';
-import 'package:moodle/widgets/nav_drawer.dart';
 import 'package:moodle/constants.dart';
+import 'package:moodle/data/app_data.dart';
+import 'package:moodle/models/course.dart';
+import 'package:moodle/widgets/moodle_scaffold.dart';
 
-class CoursesView extends StatelessWidget {
+class CoursesView extends StatefulWidget {
   const CoursesView({Key? key}) : super(key: key);
 
   @override
+  State<CoursesView> createState() => _CoursesViewState();
+}
+
+class _CoursesViewState extends State<CoursesView> {
+  String query = '';
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: moodleWhite,
-        foregroundColor: moodleTextDark,
-        elevation: 1,
-        titleSpacing: 0,
-        title: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                width: 32,
-                height: 32,
-                child: Image.asset(
-                  'images/moodle_logo.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const Text(
-                'My courses',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search_outlined),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-          const CircleAvatar(
-            radius: 18,
-            backgroundColor: moodleGrayBg,
-            foregroundColor: moodlePurple,
-            child: Text(
-              'YH',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+    final shownCourses = courses.where((course) {
+      final search = query.toLowerCase();
+      return course.title.toLowerCase().contains(search) ||
+          course.code.toLowerCase().contains(search);
+    }).toList();
+
+    return MoodleScaffold(
+      title: 'My courses',
+      child: ListView(
+        padding: const EdgeInsets.all(18),
+        children: [
+          const Text(
+            'My courses',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: moodlePurple,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(height: 16),
+          TextField(
+            decoration: InputDecoration(
+              hintText: 'Search courses',
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: moodleWhite,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onChanged: (value) => setState(() => query = value),
+          ),
+          const SizedBox(height: 18),
+          if (shownCourses.isEmpty)
+            const Center(child: Text('No courses found'))
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = constraints.maxWidth >= 750 ? 2 : 1;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: shownCourses.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: columns == 1 ? 2.15 : 2.4,
+                  ),
+                  itemBuilder: (context, index) =>
+                      _CourseCard(course: shownCourses[index]),
+                );
+              },
+            ),
         ],
       ),
-      drawer: const NavDrawer(),
-      body: Container(
-        color: moodleBg,
-        child: const SingleChildScrollView(
-          padding: EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'My courses',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: moodlePurple,
+    );
+  }
+}
+
+class _CourseCard extends StatelessWidget {
+  const _CourseCard({required this.course});
+
+  final Course course;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: moodleBorder),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(context, '/course-details'),
+        child: Row(
+          children: [
+            Container(
+              width: 10,
+              color: Color(course.colourValue),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      course.code,
+                      style: TextStyle(
+                        color: Color(course.colourValue),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      course.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    LinearProgressIndicator(value: course.progress),
+                    const SizedBox(height: 4),
+                    Text('${(course.progress * 100).round()}% complete'),
+                  ],
                 ),
               ),
-              SizedBox(height: 24),
-              Text(
-                'This is the courses overview page.',
-                style: TextStyle(fontSize: 16, color: moodleTextDark),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
