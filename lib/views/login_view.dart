@@ -9,6 +9,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  final formKey = GlobalKey<FormState>();
   bool hidePassword = true;
 
   @override
@@ -26,8 +27,10 @@ class _LoginViewState extends State<LoginView> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: [
                     Image.asset('images/moodle_logo.png', height: 70),
                     const SizedBox(height: 16),
                     const Text(
@@ -38,12 +41,24 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Username',
-                        prefixIcon: Icon(Icons.person_outline),
+                    TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'University email',
+                        hintText: 'up2246941@myport.ac.uk',
+                        prefixIcon: Icon(Icons.email_outlined),
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        final email = value?.trim().toLowerCase() ?? '';
+                        final validEmail = RegExp(
+                          r'^up\d+@myport\.ac\.uk$',
+                        ).hasMatch(email);
+                        if (!validEmail) {
+                          return 'Enter a valid UP email address';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 14),
                     TextField(
@@ -65,11 +80,15 @@ class _LoginViewState extends State<LoginView> {
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
-                        onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/',
-                          (route) => false,
-                        ),
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/',
+                              (route) => false,
+                            );
+                          }
+                        },
                         child: const Text('Log in'),
                       ),
                     ),
@@ -77,7 +96,8 @@ class _LoginViewState extends State<LoginView> {
                       onPressed: () {},
                       child: const Text('Forgotten your username or password?'),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
