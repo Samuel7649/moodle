@@ -123,10 +123,42 @@ class _MaterialItem extends StatelessWidget {
       title: Text(title),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap ?? () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$title opened')),
+        showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(title),
+            content: Text(_description(title)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  String _description(String itemTitle) {
+    const descriptions = {
+      'Announcements':
+          'Welcome to UXDI. Check this area regularly for module updates and coursework reminders.',
+      'Module handbook':
+          'The handbook contains the module aims, learning outcomes, teaching schedule and assessment information.',
+      'Coursework brief':
+          'Create a mobile optimised Moodle application in Flutter and submit the link to your public GitHub repository.',
+      'Fork the starter repository':
+          'The starter project was forked from the coursework repository before development began.',
+      'Introduction slides':
+          'An introduction to the module, the coursework and the development process.',
+      'Flutter setup worksheet':
+          'Instructions for installing Flutter, cloning the repository and running the starter application.',
+      'Responsive design slides':
+          'An overview of mobile first design and layouts that adapt to different screen sizes.',
+      'Layout worksheet':
+          'Practical exercises using Flutter layout widgets and responsive design.',
+    };
+    return descriptions[itemTitle] ?? 'This resource is available for this module.';
   }
 }
